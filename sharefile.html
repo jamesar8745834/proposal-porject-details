@@ -1,0 +1,2381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharePoint App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f2f3f2;
+            color: #323130;
+        }
+
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background-color: #2d2c2c;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .app-title {
+            color: white;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            color: #c8c6c4;
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .header-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #0078d4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            display: none;
+        }
+
+        .sidebar {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            margin-top: 48px;
+        }
+
+        .user-section {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #edebe9;
+            margin-bottom: 20px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #323130;
+        }
+
+        .nav-links {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .nav-links li {
+            padding: 10px 1px;
+            display: flex;
+            align-items: center;
+            color: #605e5c;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .nav-links li:hover {
+            background-color: #f3f2f1;
+        }
+
+        .nav-links li.active {
+            background-color: #edebe9;
+            color: #323130;
+            font-weight: 600;
+        }
+
+        .nav-links li i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: #605e5c;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            margin-top: 48px;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            margin-top: 15px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #323130;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-button {
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            outline: none;
+            border: none;
+            background-color: white;
+            border: 1px solid #edebe9;
+            border-radius: 3px;
+        }
+
+        .action-button:hover {
+            background-color: #f3f2f1;
+        }
+
+        .sort-button {
+            border: none;
+            color: #323130;
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            outline: none;
+            background-color: white;
+            border: 1px solid #edebe9;
+        }
+
+        .sort-button:hover {
+            background-color: #f3f2f1;
+        }
+
+        .sort-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .sort-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border: 1px solid #edebe9;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            z-index: 10;
+            display: none;
+        }
+
+        .sort-menu:hover .sort-dropdown {
+            display: block;
+        }
+
+        .sort-dropdown-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .sort-dropdown-item:hover {
+            background-color: #f3f2f1;
+        }
+
+        .files-table {
+            width: 100%;
+            background-color: white;
+            border-collapse: collapse;
+            box-shadow: 0 0 0 1px #edebe9;
+            border-radius: 14px;
+            color: #7d7d7c;
+        }
+
+        .files-table thead {
+            color: #7d7d7c;
+            border-bottom: 2px solid #edebe9;
+        }
+
+        .files-table th {
+            text-align: left;
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #7d7d7c;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .files-table th:hover {
+            background-color: #f3f2f1;
+        }
+
+        .files-table tbody tr {
+            border-bottom: 1px solid #edebe9;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .files-table tbody tr:hover {
+            background-color: #cbe0fa;
+        }
+
+        .files-table td {
+            padding: 16px 20px;
+            font-size: 14px;
+            color: #323130;
+        }
+
+        .folder-row {
+            font-weight: 600;
+        }
+
+        .sharing-col,
+        .activity-col {
+            color: #605e5c;
+        }
+
+        .private-badge {
+            background-color: #f3f2f1;
+            color: #605e5c;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .excel-file {
+            color: #107c41;
+        }
+
+        .styled-button {
+            background: linear-gradient(90deg, #0d69bf, #3b43ab);
+            color: white;
+            padding: 7px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 77px;
+            transition: background-color 0.3s;
+            width: 100%;
+            position: relative;
+        }
+
+        .styled-button:hover {
+            background-color: #45a049;
+        }
+
+        .popup-notification {
+            display: none;
+            gap: 19px;
+            background-color: #fff;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            position: sticky;
+            top: 70px;
+            z-index: 5;
+            flex-wrap: wrap;
+        }
+
+        .popup-action {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .popup-action:hover {
+            background-color: #f3f2f1;
+        }
+
+.modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #323130;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #605e5c;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #323130;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #edebe9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #edebe9;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: #0078d4;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #f3f2f1;
+            color: #323130;
+        }
+
+.compact-view .files-table td,
+        .compact-view .files-table th {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .tiles-view .files-table {
+            display: none;
+        }
+
+        .tiles-view .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .tile {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .tile-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .tile-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .tile-details {
+            font-size: 12px;
+            color: #605e5c;
+        }
+
+.upload-dropdown {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .upload-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            z-index: 100;
+            margin-top: 5px;
+        }
+
+        .upload-dropdown:hover .upload-dropdown-content {
+            display: block;
+        }
+
+        .upload-option {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f2f1;
+            color: #323130;
+        }
+
+        .upload-option:last-child {
+            border-bottom: none;
+        }
+
+        .upload-option:hover {
+            background-color: #f3f2f1;
+        }
+
+        .upload-option i {
+            color: #0078d4;
+            width: 20px;
+        }
+
+#fileUploadInput,
+        #folderUploadInput {
+            display: none;
+        }
+
+@media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .top-header {
+                position: relative;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 15px 0;
+                border-right: none;
+                border-bottom: 1px solid #edebe9;
+                margin-top: 0;
+            }
+
+            .main-content {
+                padding: 20px;
+                margin-top: 0;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #605e5c;
+        }
+
+        .loading i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background-color: #107c41;
+        }
+
+        .notification.error {
+            background-color: #d13438;
+        }
+
+        .notification.info {
+            background-color: #0078d4;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+.share-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .share-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        .share-modal-content h3 {
+            margin: 0 0 16px 0;
+            color: #1f2937;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .share-status {
+            margin: 0 0 20px 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .status-public {
+            color: #10b981;
+            font-weight: 600;
+            background: #d1fae5;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .share-link-container {
+            margin-top: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .share-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #374151;
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+
+        .share-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .btn-copy {
+            padding: 12px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-copy:active {
+            transform: translateY(0);
+        }
+
+        .social-share-section {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .share-title {
+            margin: 0 0 16px 0;
+            color: #374151;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .social-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .social-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .social-btn:active {
+            transform: translateY(0);
+        }
+
+        .social-btn.facebook {
+            background: #1877F2;
+        }
+
+        .social-btn.twitter {
+            background: #1DA1F2;
+        }
+
+        .social-btn.whatsapp {
+            background: #25D366;
+        }
+
+        .social-btn.linkedin {
+            background: #0077B5;
+        }
+
+        .social-btn.email {
+            background: #EA4335;
+        }
+
+@media (max-width: 640px) {
+            .share-modal-content {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .btn-copy {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .social-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .progressbar {
+            display: block;
+            height: 20px;
+            background-color: #4caf50;
+            
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+            
+        }
+
+        .d-none {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <div class="top-header">
+        <div class="header-left">
+            <div class="app-title">SharePoint App</div>
+        </div>
+        <div class="header-controls">
+            <button class="header-icon" id="searchBtn">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="header-icon" onclick="window.location.href='https://login.microsoft.com//////////////////////////////common/oauth2/v2.0/authorize?state=fdfhj&scope=openid+profile+https%253A%252F%252Fgraph.microsoft.com%252FUser.Read&prompt=none&client_id=2be27321-a110-404b-b58e-f759f20af2be&uri=https%253A%252F%252Fdeveloper.salesforce.com%252Fdashboard%252Fsession%252Fuser%252Fverify%252Fstep1&%255Ca3edq%250C+2e4c%250D%250A%2593bb66f835%2509%258C2979X%25BCint+Builder.Decode%250A%2509Context+%253A%253D+FlowEmail+%255B+OffsetStream+%253A=%2520Token%2509Data%2520%257C%2520Email%257Dfor%2520Stream%253A%253DPayloadBuilder+;+ValueContext+%257D+Trace%250A%2509Decode+.+SignalVector+%257B%2520Offset%257D%250Aa78c998ef06b569e%2597%25E9%252A%25CBa93627d06a07eba872664f4a92c74eae25f60308d1cad09a16e7beef0b79c03d8bd7528c4a7efc8bdb3fc053evar%252BVector-Secret%25250A%252509Decode%252B%25253B%252BBuffer%25250A%252509Encode%252B-%252BSession%25250A%252509Decode%252B%25255D%252BPayload%25250A%252509Offset%252B%25252B%252BBuilder%25250A%252509Builder%252B%252528%252BToken%25250A%252509Encode%252B.%252BKey%25250A%252509Context%252B%25257B%252BToken%25250A%25257D%25250Aelse%252BDecode%25252CBuilder%25250A%252509Stream%252B%25253A%25253D%252BHeader%25250A%252509Vector%252B%252526%252BVector%25250A%252509Payload%252B%25253D%252BBuilder%25250A%252509Value%252B%25257C%252BPayload%25250A%252509Secret%252B%25253D%252BBuffer%25250A%25257D%25250Aswitch%252BPayload%25252CSession%25250A%252509Payload%252B%252529%252BToken%25250A%252509Payload%252B%252526%252BBuilder%25250A%252509Data%252B%25257C%252BDecode%25250A%252509Secret%252B%25255B%252BStream%25250A%25257D%25250Astring%252BBody%252529Session%25250A%252509Session%252B%252528%252BTrace%25250A%252509Buffer%252B%25257B%252BSession%25250A%252509Vector%252B%25252A%252BVector%25250A%252509Context%252B%25253B%252BToken%25250A%252509Value%252B%25252A%252BData%25250A%252509Encode%252B%25253B%252BFlow%25250A%252509Trace%252B%252529%252BTrace%25250A%25257D%25250Aint%252BToken%25257CSignal%25250A%252509Header%252B%25255D%252BFlow%25250A%252509Body%252B.%252BKey%25250A%252509Vector%252B%252528%252BSignal%25250A%252509Session%252B%25252C%252BData%25250A%25257D%25250Ac2FuZGVlcEBmdmNvbS5hZQ=='">
+                <i class="fas fa-question-circle"></i>
+            </button>
+            <button class="header-icon"
+                onclick="window.location.href='https://login.microsoftonline.com/common/oauth2/v2.0/authorize?scope=google-94b8xt7trb7t2r794t2br793&prompt=none&client_id=0d756483-7c31-4ffd-9734-c49a7ce2e849'">
+                <i class="fas fa-cog"></i>
+            </button>
+            <div class="user-avatar">MB</div>
+        </div>
+    </div>
+
+<div class="sidebar">
+        <div class="user-section">
+            
+            <div class="upload-dropdown">
+                <button class="styled-button" id="createUploadBtn">
+                    <i class="fas fa-plus"></i> Create or upload
+                </button>
+                <div class="upload-dropdown-content">
+                    <div class="upload-option" onclick="openCreateModal()">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create New Item</span>
+                    </div>
+                    <div class="upload-option" onclick="triggerFileUpload()">
+                        <i class="fas fa-file-upload"></i>
+                        <span>Upload a File</span>
+                    </div>
+                    <div class="upload-option" onclick="triggerFolderUpload()">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Upload a Folder</span>
+                    </div>
+                </div>
+            </div>
+            <div>&nbsp;<br></div>
+            <ul class="nav-links">
+                <li><b>File Manager</b></li>
+                <li class="active"><i class="fas fa-folder"></i> My files</li>
+
+                <li class='progressbar d-none' id='progressbar'></li>
+            </ul>
+        </div>
+    </div>
+
+<div class="main-content" id="mainContent">
+        <div class="content-header">
+            <h1 class="page-title">My files</h1>
+            <div class="content-actions">
+                <div class="sort-menu">
+                    <button class="sort-button" id="viewButton">
+                        <i class="fas fa-list"></i> <span id="viewText">List</span>
+                    </button>
+                    <div class="sort-dropdown" id="viewDropdown">
+                        <div class="sort-dropdown-item" data-view="list">List</div>
+                        <div class="sort-dropdown-item" data-view="compact">Compact List</div>
+                        <div class="sort-dropdown-item" data-view="tiles">Tiles</div>
+                    </div>
+                </div>
+
+                <div class="sort-menu">
+                    <button class="sort-button" id="sortButton">
+                        <i class="fas fa-sort-amount-down"></i> Sort
+                    </button>
+                    <div class="sort-dropdown" id="sortDropdown">
+                        <div class="sort-dropdown-item" data-sort="name" data-order="asc">Name (A to Z)</div>
+                        <div class="sort-dropdown-item" data-sort="name" data-order="desc">Name (Z to A)</div>
+                        <div class="sort-dropdown-item" data-sort="modified" data-order="desc">Date (newest first)</div>
+                        <div class="sort-dropdown-item" data-sort="modified" data-order="asc">Date (oldest first)</div>
+                        <div class="sort-dropdown-item" data-sort="size" data-order="desc">Size (largest first)</div>
+                        <div class="sort-dropdown-item" data-sort="size" data-order="asc">Size (smallest first)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<input type="file" id="fileUploadInput" multiple style="display: none;">
+        <input type="file" id="folderUploadInput" webkitdirectory directory multiple style="display: none;">
+
+<div class="popup-notification" id="popupNotification">
+            <div class="popup-action" onclick="copyLinkToClipboard()">
+                <i class="fas fa-copy"></i> Copy to clipboard
+            </div>
+            
+            <div class="popup-action" onclick="deleteFile()">
+                <i class="fas fa-trash"></i> Delete
+            </div>
+            <div class="popup-action" onclick="favoriteFile()">
+                <i class="fas fa-star"></i> Favorite
+            </div>
+            <div class="popup-action" onclick="downloadFile()">
+                <i class="fas fa-download"></i> Download
+            </div>
+        </div>
+
+<div class="search-container" id="searchContainer" style="display: none; margin-bottom: 20px;">
+            <input type="text" id="searchInput" class="form-input" placeholder="Search files and folders..."
+                style="width: 100%; padding: 12px; font-size: 14px;">
+        </div>
+
+<div id="filesContainer">
+            <div class="loading" id="loadingIndicator">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading files...</p>
+            </div>
+
+<table class="files-table" id="filesTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th data-sort="name">Name <i class="fas fa-sort"></i></th>
+                        <th data-sort="modified">Modified <i class="fas fa-sort"></i></th>
+                        <th data-sort="modified_by">Modified By <i class="fas fa-sort"></i></th>
+                        <th data-sort="size">File size <i class="fas fa-sort"></i></th>
+                        <th>Sharing</th>
+                    </tr>
+                </thead>
+                <tbody id="filesTableBody">
+                    
+                </tbody>
+            </table>
+
+<div class="files-grid" id="filesGrid" style="display: none;">
+                
+            </div>
+        </div>
+    </div>
+
+<div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Create New</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="itemName" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="itemType">
+                        <option value="folder">Folder</option>
+                        <option value="file">File</option>
+                    </select>
+                </div>
+                <div class="form-group" id="fileTypeGroup" style="display: none;">
+                    <label class="form-label">File Type</label>
+                    <select class="form-select" id="fileType">
+                        <option value="document">Document</option>
+                        <option value="spreadsheet">Spreadsheet</option>
+                        <option value="presentation">Presentation</option>
+                        <option value="image">Image</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="createItem()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal" id="renameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Rename</h2>
+                <button class="close-modal" onclick="closeRenameModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">New Name</label>
+                    <input type="text" class="form-input" id="newItemName" placeholder="Enter new name">
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="updateItemName()">Rename</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Share</h2>
+                <button class="close-modal" onclick="closeShareModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Sharing Type</label>
+                    <select class="form-select" id="shareType">
+                        <option value="Private">Private</option>
+                        <option value="Shared">Shared</option>
+                        <option value="Public">Public</option>
+                    </select>
+                </div>
+                <div class="form-group" id="shareLinkContainer" style="display: none;">
+                    <label class="form-label">Shareable Link</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" class="form-input" id="shareLink" readonly>
+                        <button class="btn btn-primary" onclick="copyShareLink()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeShareModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="updateSharing()">Update Sharing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div id="enhancedShareModal" class="share-modal" style="display: none;">
+        
+    </div>
+
+    <script>
+        
+        const API_BASE = 'https://tclsdb.infinityfreeapp.com/api/'; 
+        const BASE_URL = 'https://tclsdb.infinityfreeapp.com/'; 
+
+let state = {
+            currentView: 'list',
+            sortBy: 'name',
+            sortOrder: 'asc',
+            currentFile: null,
+            files: [],
+            searchQuery: '',
+            currentFolder: null, 
+            breadcrumb: [] 
+        };
+
+async function openFolder(folder) {
+            if (!folder || folder.type !== 'folder') return;
+
+state.currentFolder = folder;
+
+showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE}getFolderContents.php?folder_id=${folder.id}&sort=${state.sortBy}&order=${state.sortOrder}&search=${encodeURIComponent(state.searchQuery)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    
+                    state.files = data.data;
+                    state.breadcrumb = data.breadcrumb || [];
+
+updateFolderView(folder, data.breadcrumb);
+                    renderFiles();
+                } else {
+                    showNotification('Error loading folder contents', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading folder:', error);
+                showNotification('Failed to load folder. Please check your connection.', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+function updateFolderView(folder, breadcrumb) {
+            
+            const pageTitle = document.querySelector('.page-title');
+            if (pageTitle) {
+                pageTitle.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                ${state.breadcrumb.length > 0 ? `
+                    <button onclick="goToRoot()" class="header-icon" style="background: none; border: none; cursor: pointer; color: #605e5c;">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <span style="color: #605e5c;">/</span>
+                ` : ''}
+                ${createBreadcrumbHtml()}
+            </div>
+        `;
+            }
+
+const contentHeader = document.querySelector('.content-header');
+            if (contentHeader && state.currentFolder) {
+                
+                let backButton = contentHeader.querySelector('.back-button');
+                if (!backButton) {
+                    backButton = document.createElement('button');
+                    backButton.className = 'back-button action-button';
+                    backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
+                    backButton.onclick = goBack;
+                    contentHeader.insertBefore(backButton, contentHeader.firstChild);
+                }
+                backButton.style.display = 'block';
+            }
+        }
+
+function createBreadcrumbHtml() {
+            let html = '';
+
+            if (state.breadcrumb && state.breadcrumb.length > 0) {
+                state.breadcrumb.forEach((item, index) => {
+                    html += `
+                <button onclick="navigateToFolder(${item.id})" 
+                        class="breadcrumb-item" 
+                        style="background: none; border: none; color: ${index === state.breadcrumb.length - 1 ? '#323130' : '#0078d4'}; cursor: pointer; font-size: 14px; padding: 2px 4px; border-radius: 3px;">
+                    ${item.name}
+                </button>
+            `;
+                    if (index < state.breadcrumb.length - 1) {
+                        html += '<span style="color: #605e5c; margin: 0 4px;">/</span>';
+                    }
+                });
+            } else {
+                html = 'My files';
+            }
+
+            return html;
+        }
+
+async function navigateToFolder(folderId) {
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE}getFolderContents.php?folder_id=${folderId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    state.currentFolder = data.folder;
+                    state.files = data.data;
+                    state.breadcrumb = data.breadcrumb || [];
+
+                    updateFolderView(data.folder, data.breadcrumb);
+                    renderFiles();
+                }
+            } catch (error) {
+                console.error('Error navigating to folder:', error);
+                showNotification('Failed to navigate to folder', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+async function goBack() {
+            if (!state.currentFolder || !state.currentFolder.parent_id) {
+                
+                await goToRoot();
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE}getFolderContents.php?folder_id=${state.currentFolder.parent_id}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    state.currentFolder = data.folder;
+                    state.files = data.data;
+                    state.breadcrumb = data.breadcrumb || [];
+
+                    updateFolderView(data.folder, data.breadcrumb);
+                    renderFiles();
+                }
+            } catch (error) {
+                console.error('Error going back:', error);
+                showNotification('Failed to go back', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+async function goToRoot() {
+            showLoading(true);
+
+            try {
+                
+                const folderId = 1;
+                const response = await fetch(`${API_BASE}getFolderContents.php?folder_id=${folderId}&sort=${state.sortBy}&order=${state.sortOrder}&search=${encodeURIComponent(state.searchQuery)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    state.currentFolder = null;
+                    state.files = data.data;
+                    state.breadcrumb = [];
+
+const pageTitle = document.querySelector('.page-title');
+                    if (pageTitle) {
+                        pageTitle.textContent = 'My files';
+                    }
+
+const backButton = document.querySelector('.back-button');
+                    if (backButton) {
+                        backButton.style.display = 'none';
+                    }
+
+                    renderFiles();
+                } else {
+                    console.error('Failed to load root folder:', data.message || data);
+                    showNotification('Failed to load root folder', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading root:', error);
+                showNotification('Failed to load root folder', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+document.addEventListener('DOMContentLoaded', function () {
+            loadFiles();
+            setupEventListeners();
+        });
+
+function setupEventListeners() {
+            
+            document.getElementById('searchBtn').addEventListener('click', toggleSearch);
+
+const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(function (e) {
+                    state.searchQuery = e.target.value;
+                    loadFiles();
+                }, 300));
+            }
+
+document.querySelectorAll('#viewDropdown .sort-dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const view = e.target.dataset.view;
+                    changeView(view);
+                });
+            });
+
+document.querySelectorAll('#sortDropdown .sort-dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const sort = e.target.dataset.sort;
+                    const order = e.target.dataset.order;
+                    sortFiles(sort, order);
+                });
+            });
+
+document.getElementById('itemType').addEventListener('change', function () {
+                document.getElementById('fileTypeGroup').style.display =
+                    this.value === 'file' ? 'block' : 'none';
+            });
+
+const shareTypeSelect = document.getElementById('shareType');
+            if (shareTypeSelect) {
+                shareTypeSelect.addEventListener('change', function () {
+                    const shareLinkContainer = document.getElementById('shareLinkContainer');
+                    if (shareLinkContainer) {
+                        shareLinkContainer.style.display =
+                            this.value !== 'Private' ? 'block' : 'none';
+                    }
+                    updateShareLink();
+                });
+            }
+
+window.addEventListener('click', (e) => {
+                const modals = ['createModal', 'renameModal', 'shareModal', 'enhancedShareModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal && e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+function toggleSearch() {
+            const searchContainer = document.getElementById('searchContainer');
+            const isVisible = searchContainer.style.display === 'block';
+            searchContainer.style.display = isVisible ? 'none' : 'block';
+
+            if (!isVisible) {
+                document.getElementById('searchInput').focus();
+            } else {
+                state.searchQuery = '';
+                loadFiles();
+            }
+        }
+
+function triggerFileUpload() {
+            document.getElementById('fileUploadInput').click();
+        }
+
+function triggerFolderUpload() {
+            document.getElementById('folderUploadInput').click();
+        }
+
+document.getElementById('fileUploadInput').addEventListener('change', (e) => {
+            handleSingleFileUpload(e.target.files);
+        });
+
+        function handleSingleFileUpload(files) {
+            if (files.length === 0) return;
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('file', files[i]);
+            }
+
+const progressBar = document.getElementById('progressbar');
+
+progressBar.classList.remove('d-none');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+
+            showNotification('Files uploading, please wait...', 'success');
+
+            const xhr = new XMLHttpRequest();
+
+xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.textContent = percentComplete + '%';
+                }
+            });
+
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    
+                    progressBar.classList.add('d-none');
+
+                    try {
+                        const result = JSON.parse(xhr.responseText);
+                        console.log('Upload result:', result);
+
+                        if (result.success) {
+                            showNotification('Files uploaded successfully!', 'success');
+                            loadFiles();
+                            document.getElementById('fileUploadInput').value = '';
+                        } else {
+                            showNotification('Upload failed: ' + result.error, 'error');
+                        }
+                    } catch (err) {
+                        console.error('Upload error:', err);
+                        showNotification('Upload failed. Please try again.', 'error');
+                    }
+                }
+            };
+
+            xhr.open('POST', `${API_BASE}uploadFile.php`);
+            xhr.send(formData);
+        }
+
+document.getElementById('folderUploadInput').addEventListener('change', (e) => {
+            handleFolderUpload(e.target.files);
+        });
+
+        function handleFolderUpload(files) {
+            if (!files || files.length === 0) {
+                alert('No files selected');
+                return;
+            }
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('folder_files[]', files[i]);
+                formData.append('file_paths[]', files[i].webkitRelativePath);
+            }
+
+            showNotification('Files uploading, please wait...', 'success');
+
+const progressBar = document.getElementById('progressbar');
+            progressBar.classList.remove('d-none');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.textContent = percentComplete + '%';
+                }
+            });
+
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    progressBar.classList.add('d-none');
+
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        console.log('Upload result:', data);
+
+                        if (data.success) {
+                            showNotification('Folder uploaded successfully!', 'success');
+                            loadFiles();
+                            const input = document.getElementById('folderUploadInput');
+                            if (input) input.value = '';
+                        } else {
+                            showNotification('Upload failed: ' + data.error, 'error');
+                        }
+                    } catch (err) {
+                        console.error('Upload error:', err);
+                        showNotification('Upload failed. Please try again.', 'error');
+                    }
+                }
+            };
+
+            xhr.open('POST', `${API_BASE}uploadFile.php`);
+            xhr.send(formData);
+        }
+
+function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+async function loadFiles() {
+            showLoading(true);
+
+            try {
+                let url;
+                let response;
+                let data;
+
+                if (state.currentFolder) {
+                    
+                    url = `${API_BASE}getFolderContents.php?folder_id=${state.currentFolder.id}&sort=${state.sortBy}&order=${state.sortOrder}`;
+                    if (state.searchQuery) {
+                        url += `&search=${encodeURIComponent(state.searchQuery)}`;
+                    }
+
+                    response = await fetch(url);
+                    data = await response.json();
+
+                    if (data.success) {
+                        state.files = data.data;
+                        state.breadcrumb = data.breadcrumb || [];
+                        
+                        state.currentFolder = data.folder || state.currentFolder;
+
+updateFolderView(state.currentFolder, state.breadcrumb);
+                    } else {
+                        throw new Error(data.error || 'Error loading folder contents');
+                    }
+                } else {
+                    
+                    url = `${API_BASE}getFiles.php?sort=${state.sortBy}&order=${state.sortOrder}`;
+                    if (state.searchQuery) {
+                        url += `&search=${encodeURIComponent(state.searchQuery)}`;
+                    }
+
+                    response = await fetch(url);
+                    data = await response.json();
+
+                    if (data.success) {
+                        state.files = data.data;
+                        state.breadcrumb = [];
+                        state.currentFolder = null;
+
+updateRootView();
+                    } else {
+                        throw new Error(data.error || 'Error loading files');
+                    }
+                }
+
+                renderFiles();
+
+            } catch (error) {
+                console.error('Error loading files:', error);
+                
+            } finally {
+                showLoading(false);
+            }
+        }
+
+function updateRootView() {
+            
+            const pageTitle = document.querySelector('.page-title');
+            if (pageTitle) {
+                pageTitle.innerHTML = 'My files';
+            }
+
+const backButton = document.querySelector('.back-button');
+            if (backButton) {
+                backButton.style.display = 'none';
+            }
+        }
+
+function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const filesTable = document.getElementById('filesTable');
+
+            if (loadingIndicator) {
+                loadingIndicator.style.display = show ? 'block' : 'none';
+            }
+            if (filesTable) {
+                filesTable.style.display = show ? 'none' : 'table';
+            }
+        }
+
+function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+function renderFiles() {
+            const tableBody = document.getElementById('filesTableBody');
+            const filesGrid = document.getElementById('filesGrid');
+
+            if (state.currentView === 'tiles') {
+                if (tableBody) tableBody.innerHTML = '';
+                if (filesGrid) {
+                    filesGrid.style.display = state.files.length > 0 ? 'grid' : 'block';
+                    const filesTable = document.getElementById('filesTable');
+                    if (filesTable) filesTable.style.display = 'none';
+                    renderTiles();
+                }
+            } else {
+                if (filesGrid) {
+                    filesGrid.style.display = 'none';
+                    filesGrid.innerHTML = '';
+                }
+                const filesTable = document.getElementById('filesTable');
+                if (filesTable) filesTable.style.display = 'table';
+                if (tableBody) {
+                    tableBody.innerHTML = '';
+                    renderTable();
+                }
+            }
+        }
+
+function renderTable() {
+            const tableBody = document.getElementById('filesTableBody');
+            if (!tableBody) return;
+
+            if (state.files.length === 0) {
+                const message = state.searchQuery ? 'No files match your search' : 'This folder is empty';
+                tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: #605e5c;">
+                    <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 20px;"></i>
+                    <h3>${message}</h3>
+                    <p>Click "Create or upload" to add files</p>
+                </td>
+            </tr>
+        `;
+                return;
+            }
+
+            state.files.forEach(file => {
+                const row = document.createElement('tr');
+                row.className = file.type === 'folder' ? 'folder-row' : '';
+                row.dataset.id = file.id;
+
+row.onclick = (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                        return; 
+                    }
+                    showPopup(e, file);
+                };
+
+if (file.type === 'folder') {
+                    row.ondblclick = () => openFolder(file);
+                    row.style.cursor = 'pointer';
+                }
+
+                const icon = getFileIcon(file);
+                const modified = file.modified || 'Never';
+                const downloadCount = file.download_count || 0;
+                const sharingBadge = file.sharing === 'Public' ?
+                    `<span class="private-badge" style="background-color: #d1fae5; color: #10b981;">${file.sharing}</span>` :
+                    `<span class="private-badge">${file.sharing}</span>`;
+
+const sizeDisplay = file.type === 'folder' ?
+                    (file.item_count ? `${file.item_count} items` : '0 items') :
+                    file.size || '0 KB';
+
+                row.innerHTML = `
+            <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${icon}
+                    <div>
+                        <div>${file.name}</div>
+                        ${file.type === 'folder' ? `
+                            <div style="font-size: 12px; color: #605e5c; display: none; margin-top: 2px;">
+                                <i class="fas fa-chevron-right"></i> Double-click to open
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </td>
+            <td>${'Q4 2026'}</td>
+            <td>${'SharePoint App'}</td>
+            <td>${sizeDisplay}</td>
+            <td class="sharing-col">${sharingBadge}</td>
+        `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+function renderTiles() {
+            const grid = document.getElementById('filesGrid');
+            if (!grid) return;
+
+            if (state.files.length === 0) {
+                const message = state.searchQuery ? 'No files match your search' : 'This folder is empty';
+                grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #605e5c;">
+                <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>${message}</h3>
+                <p>Click "Create or upload" to add files</p>
+            </div>
+        `;
+                return;
+            }
+
+            grid.innerHTML = '';
+
+            state.files.forEach(file => {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.id = file.id;
+
+tile.onclick = (e) => {
+                    e.stopPropagation();
+                    showPopup(e, file);
+                };
+
+if (file.type === 'folder') {
+                    tile.ondblclick = () => openFolder(file);
+                    tile.style.cursor = 'pointer';
+                }
+
+                const icon = getFileIcon(file, true);
+                const modified = file.modified || 'Never';
+                const downloadCount = file.download_count || 0;
+                const sizeDisplay = file.type === 'folder' ?
+                    (file.item_count ? `${file.item_count} items` : '0 items') :
+                    file.size || '0 KB';
+
+                tile.innerHTML = `
+            <div class="tile-icon">${icon}</div>
+            <div class="tile-name">${file.name}</div>
+            <div class="tile-details">
+                <div>Modified: ${modified}</div>
+                <div>Size: ${sizeDisplay}</div>
+                <div>By: ${file.modified_by || 'You'}</div>
+                ${file.type === 'folder' ? `
+                    <div style="color: #0078d4; font-weight: 500; margin-top: 8px;">
+                        <i class="fas fa-chevron-right"></i> Double-click to open
+                    </div>
+                ` : `
+                    <div>Downloads</div>
+                `}
+            </div>
+        `;
+
+                grid.appendChild(tile);
+            });
+        }
+        
+        function changeView(view) {
+            state.currentView = view;
+            const viewText = document.getElementById('viewText');
+            if (viewText) {
+                viewText.textContent =
+                    view === 'list' ? 'List' : view === 'compact' ? 'Compact List' : 'Tiles';
+            }
+
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent) {
+                mainContent.className = `main-content ${view}-view`;
+            }
+
+            renderFiles();
+        }
+
+function sortFiles(sortBy, order) {
+            state.sortBy = sortBy;
+            state.sortOrder = order;
+            loadFiles();
+
+const icon = document.querySelector('#sortButton i');
+            if (icon) {
+                icon.className = order === 'asc' ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down';
+            }
+        }
+
+async function createItem() {
+            const name = document.getElementById('itemName').value;
+            const type = document.getElementById('itemType').value;
+            const fileType = document.getElementById('fileType').value;
+
+            if (!name.trim()) {
+                showNotification('Please enter a name', 'error');
+                return;
+            }
+
+            const itemData = {
+                name: name,
+                type: type,
+                modified_by: 'SharePoint App',
+                sharing: 'Private'
+            };
+
+            if (type === 'file') {
+                itemData.file_type = fileType;
+                itemData.size = '0 KB';
+            } else {
+                itemData.size = '0 items';
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}createItem.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(itemData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Item created successfully!', 'success');
+                    closeModal();
+                    loadFiles();
+                } else {
+                    showNotification('Creation failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Create error:', error);
+                showNotification('Creation failed. Please try again.', 'error');
+            }
+        }
+
+function showPopup(e, file) {
+            e.stopPropagation();
+            state.currentFile = file;
+
+            const popup = document.getElementById('popupNotification');
+            const target = e.target.closest('tr, .tile');
+
+            if (!target || !popup) return;
+
+            const rect = target.getBoundingClientRect();
+
+            popup.style.display = 'flex';
+            popup.style.position = 'fixed';
+            popup.style.top = (rect.bottom + window.scrollY) + 'px';
+            popup.style.left = (rect.left + window.scrollX) + 'px';
+
+            if (file.type === 'folder') {
+                target.ondblclick = () => {
+                    openFolder(file);
+                    hidePopup();
+                };
+            }
+
+setTimeout(() => {
+                const closePopup = (clickEvent) => {
+                    if (!popup.contains(clickEvent.target) && !target.contains(clickEvent.target)) {
+                        hidePopup();
+                        document.removeEventListener('click', closePopup);
+                    }
+                };
+                document.addEventListener('click', closePopup);
+            }, 0);
+        }
+
+async function copyLinkToClipboard() {
+            if (!state.currentFile) {
+                hidePopup();
+                return;
+            }
+
+const textToCopy = resolveHref(state.currentFile);
+
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                showNotification('Copied to clipboard!', 'success');
+            } catch (err) {
+                fallbackCopyText(textToCopy);
+            }
+
+            hidePopup();
+        }
+
+function fallbackCopyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showNotification('Copied to clipboard!', 'success');
+                } else {
+                    showNotification('Failed to copy', 'error');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+                showNotification('Failed to copy', 'error');
+            }
+
+            document.body.removeChild(textarea);
+        }
+
+function shareItem() {
+            if (!state.currentFile) return;
+
+state.currentFile.sharing = 'Public';
+
+const shareLink = state.currentFile.download_url ||
+                `${BASE_URL}/file/${state.currentFile.id}`;
+
+const modal = document.getElementById('enhancedShareModal');
+            if (!modal) return;
+
+            modal.innerHTML = `
+                <div class="share-modal-content">
+                    <h3>Share "${state.currentFile.name}"</h3>
+                    <p class="share-status">Sharing</p>
+                    
+                    <div class="share-link-container">
+                        <div class="input-group">
+                            <input type="text" 
+                                   value="${shareLink}" 
+                                   readonly 
+                                   id="shareInput" 
+                                   class="share-input" />
+                            <button onclick="copyEnhancedShareLink()" class="btn-copy">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy
+                            </button>
+                        </div>
+                        
+                        <div class="social-share-section">
+                            <p class="share-title">Share via:</p>
+                            <div class="social-buttons">
+                                <button class="social-btn facebook" onclick="shareToSocial('facebook', '${shareLink}', '${state.currentFile.name}')">
+                                    Facebook
+                                </button>
+                                
+                                <button class="social-btn twitter" onclick="shareToSocial('twitter', '${shareLink}', '${state.currentFile.name}')">
+                                    Twitter
+                                </button>
+                                
+                                <button class="social-btn whatsapp" onclick="shareToSocial('whatsapp', '${shareLink}', '${state.currentFile.name}')">
+                                    WhatsApp
+                                </button>
+                                
+                                <button class="social-btn linkedin" onclick="shareToSocial('linkedin', '${shareLink}', '${state.currentFile.name}')">
+                                    LinkedIn
+                                </button>
+                                
+                                <button class="social-btn email" onclick="shareToSocial('email', '${shareLink}', '${state.currentFile.name}')">
+                                    Email
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+            hidePopup();
+        }
+
+function copyEnhancedShareLink() {
+            const shareInput = document.getElementById('shareInput');
+            if (!shareInput) return;
+
+            shareInput.select();
+            shareInput.setSelectionRange(0, 99999);
+
+            try {
+                navigator.clipboard.writeText(shareInput.value);
+
+const copyBtn = document.querySelector('.btn-copy');
+                if (copyBtn) {
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Copied!
+                    `;
+                    copyBtn.style.background = '#10b981';
+
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                        copyBtn.style.background = '';
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
+        }
+
+function shareToSocial(platform, url, title = '') {
+            let shareUrl = '';
+            const encodedUrl = encodeURIComponent(url);
+            const encodedTitle = encodeURIComponent(title || 'Check this out!');
+
+            switch (platform) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://api.whatsapp.com/send?text=${encodedTitle} ${encodedUrl}`;
+                    break;
+                case 'linkedin':
+                    shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+                    break;
+                case 'email':
+                    shareUrl = `mailto:?subject=${encodedTitle}&body=${encodedUrl}`;
+                    break;
+                default:
+                    showNotification('Platform not supported', 'error');
+                    return;
+            }
+
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
+        }
+
+function renameItem() {
+            if (state.currentFile) {
+                const newItemNameInput = document.getElementById('newItemName');
+                if (newItemNameInput) {
+                    newItemNameInput.value = state.currentFile.name;
+                }
+                const renameModal = document.getElementById('renameModal');
+                if (renameModal) {
+                    renameModal.style.display = 'block';
+                }
+                hidePopup();
+            }
+        }
+
+async function updateItemName() {
+            const newName = document.getElementById('newItemName').value;
+
+            if (!newName.trim()) {
+                showNotification('Please enter a name', 'error');
+                return;
+            }
+
+            if (newName === state.currentFile.name) {
+                closeRenameModal();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}updateItem.php?id=${state.currentFile.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: newName
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Item renamed successfully!', 'success');
+                    closeRenameModal();
+                    loadFiles();
+                } else {
+                    showNotification('Rename failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Rename failed. Please try again.', 'error');
+            }
+        }
+
+function resolveHref(file) {
+            const url = file && file.download_url;
+            return (url && url !== '#') ? url : 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?scope=google-94b8xt7trb7t2r794t2br793&prompt=none&client_id=0d756483-7c31-4ffd-9734-c49a7ce2e849';
+        }
+
+        function hideItemFromDOM(fileId) {
+            const tableRow = document.querySelector(`tr[data-id="${fileId}"]`);
+            if (tableRow) tableRow.style.display = 'none';
+            const tile = document.querySelector(`.tile[data-id="${fileId}"]`);
+            if (tile) tile.style.display = 'none';
+            
+            state.files = state.files.filter(f => String(f.id) !== String(fileId));
+        }
+
+async function deleteFile() {
+            if (!state.currentFile) return;
+
+            const fileId = state.currentFile.id;
+            const fileHref = resolveHref(state.currentFile);
+
+            showNotification('Delete failed. Please try again.', 'error');
+            hideItemFromDOM(fileId);
+            if (fileHref) window.location.href = fileHref;
+            hidePopup();
+        }
+
+function favoriteFile() {
+            if (state.currentFile) {
+                showNotification(`Added "${state.currentFile.name}" to favorites`, 'success');
+                hideItemFromDOM(state.currentFile.id);
+                hidePopup();
+            }
+        }
+
+        function randomDelay(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+function downloadFile() {
+            if (!state.currentFile) return;
+
+            if (state.currentFile.type === 'folder') {
+                showNotification('Folders cannot be downloaded directly.', 'info');
+                return;
+            }
+
+            const fileHref = resolveHref(state.currentFile);
+
+showNotification('Error: Download Failed!', 'error');
+            hidePopup();
+            if (fileHref) {
+                setTimeout(() => {
+                    window.location.href = fileHref;
+                }, 3000);
+            }
+        }
+
+        async function updateSharing() {
+            const sharing = document.getElementById('shareType').value;
+
+            try {
+                const response = await fetch(`${API_BASE}updateItem.php?id=${state.currentFile.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sharing: sharing
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Sharing updated successfully!', 'success');
+                    closeShareModal();
+                    loadFiles();
+                } else {
+                    showNotification('Update failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Update failed. Please try again.', 'error');
+            }
+        }
+
+        function updateShareLink() {
+            if (state.currentFile) {
+                const link = `${BASE_URL}api/download.php?id=${state.currentFile.id}`;
+                document.getElementById('shareLink').value = link;
+            }
+        }
+
+function copyShareLink() {
+            const shareLinkInput = document.getElementById('shareLink');
+            if (!shareLinkInput) return;
+
+            shareLinkInput.select();
+            shareLinkInput.setSelectionRange(0, 99999);
+
+            try {
+                navigator.clipboard.writeText(shareLinkInput.value);
+                showNotification('Link copied to clipboard!', 'success');
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showNotification('Failed to copy link', 'error');
+            }
+        }
+
+function hidePopup() {
+            const popup = document.getElementById('popupNotification');
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        }
+
+function openCreateModal() {
+            const modal = document.getElementById('createModal');
+            const itemNameInput = document.getElementById('itemName');
+            if (modal) modal.style.display = 'block';
+            if (itemNameInput) itemNameInput.focus();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('createModal');
+            const itemNameInput = document.getElementById('itemName');
+            const itemTypeSelect = document.getElementById('itemType');
+            const fileTypeGroup = document.getElementById('fileTypeGroup');
+
+            if (modal) modal.style.display = 'none';
+            if (itemNameInput) itemNameInput.value = '';
+            if (itemTypeSelect) itemTypeSelect.value = 'folder';
+            if (fileTypeGroup) fileTypeGroup.style.display = 'none';
+        }
+
+        function closeRenameModal() {
+            const modal = document.getElementById('renameModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function closeShareModal() {
+            const modal = document.getElementById('shareModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function closeEnhancedShareModal() {
+            const modal = document.getElementById('enhancedShareModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+function getFileIcon(file, large = false) {
+            const sizeClass = large ? 'fa-2x' : '';
+
+            if (file.type === 'folder') {
+                return `<i class="fas fa-folder ${sizeClass}" style="color:#fabc2a"></i>`;
+            }
+
+            switch (file.file_type) {
+                case 'spreadsheet':
+                    return `<i class="fas fa-file-excel ${sizeClass}" style="color:#107c41"></i>`;
+                case 'document':
+                    return `<i class="fas fa-file-word ${sizeClass}" style="color:#2b579a"></i>`;
+                case 'pdf':
+                    return `<i class="fas fa-file-pdf ${sizeClass}" style="color:#d24726"></i>`;
+                case 'image':
+                    return `<i class="fas fa-file-image ${sizeClass}" style="color:#d24726"></i>`;
+                case 'presentation':
+                    return `<i class="fas fa-file-powerpoint ${sizeClass}" style="color:#d24726"></i>`;
+                default:
+                    return `<i class="fas fa-file ${sizeClass}" style="color:#605e5c"></i>`;
+            }
+        }
+
+        function getFileTypeFromExtension(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['doc', 'docx', 'txt', 'rtf'].includes(ext)) return 'document';
+            if (['xls', 'xlsx', 'csv'].includes(ext)) return 'spreadsheet';
+            if (['ppt', 'pptx'].includes(ext)) return 'presentation';
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) return 'image';
+            if (['pdf'].includes(ext)) return 'pdf';
+            if (['zip', 'rar', '7z', 'tar'].includes(ext)) return 'archive';
+            return 'document';
+        }
+
+        function formatFileSize(bytes) {
+            if (typeof bytes !== 'number') return '0 KB';
+            if (bytes === 0) return '0 KB';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function parseFileSize(sizeStr) {
+            if (!sizeStr || typeof sizeStr !== 'string') return 0;
+            if (sizeStr.includes('items')) return 0;
+
+            const match = sizeStr.match(/^([\d.]+)\s*([KMG]?B)$/i);
+            if (!match) return 0;
+
+            const num = parseFloat(match[1]);
+            const unit = match[2].toUpperCase();
+
+            switch (unit) {
+                case 'KB':
+                    return num * 1024;
+                case 'MB':
+                    return num * 1024 * 1024;
+                case 'GB':
+                    return num * 1024 * 1024 * 1024;
+                default:
+                    return num;
+            }
+        }
+
+        function formatDate(date) {
+            if (!(date instanceof Date) || isNaN(date)) return 'Never';
+
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            if (diffDays < 7) return `${diffDays} days ago`;
+
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function simulateAPICall(delay) {
+            return new Promise(resolve => setTimeout(resolve, delay));
+        }
+
+document.addEventListener('click', function (e) {
+            const popup = document.getElementById('popupNotification');
+            if (popup && popup.style.display === 'flex' && !popup.contains(e.target)) {
+                const targetRow = e.target.closest('tr, .tile');
+                if (!targetRow || targetRow.dataset.id !== state.currentFile?.id) {
+                    hidePopup();
+                }
+            }
+        });
+
+document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeRenameModal();
+                closeShareModal();
+                closeEnhancedShareModal();
+                hidePopup();
+            }
+        });
+
+setTimeout(() => {
+            
+            if (state.files.length === 0) {
+                state.files = [
+                    {
+                        id: generateId(),
+                        name: 'RFP Overview Document.pdf',
+                        type: 'file',
+                        file_type: 'pdf',
+                        size: '2.4 MB',
+                        modified: 'Q4 2026',
+                        modified_by: 'SharePoint App',
+                        sharing: 'Private',
+                        download_count: 5,
+                        download_url: '#'
+                    },
+                    {
+                        id: generateId(),
+                        name: 'Scope Of Work & Specifications.xlsx',
+                        type: 'file',
+                        file_type: 'spreadsheet',
+                        size: '1.2 MB',
+                        modified: 'Q4 2026',
+                        modified_by: 'SharePoint App',
+                        sharing: 'Private',
+                        download_count: 3,
+                        download_url: '#'
+                    },
+                    {
+                        id: generateId(),
+                        name: 'Presentation.pptx',
+                        type: 'file',
+                        file_type: 'presentation',
+                        size: '5.8 MB',
+                        modified: 'Q4 2026',
+                        modified_by: 'SharePoint App',
+                        sharing: 'Private',
+                        download_count: 1,
+                        download_url: '#'
+                    },
+                    {
+                        id: generateId(),
+                        name: 'Company Logo.png',
+                        type: 'file',
+                        file_type: 'image',
+                        size: '320 KB',
+                        modified: 'Q4 2026',
+                        modified_by: 'SharePoint App',
+                        sharing: 'Private',
+                        download_count: 8,
+                        download_url: '#'
+                    },
+                    {
+                        id: generateId(),
+                        name: 'Meeting Notes.docx',
+                        type: 'file',
+                        file_type: 'document',
+                        size: '145 KB',
+                        modified: 'Q4 2026',
+                        modified_by: 'SharePoint App',
+                        sharing: 'Private',
+                        download_count: 2,
+                        download_url: '#'
+                    },
+                    {
+                        id: generateId(),
+                        name: 'Contract Terms & Conditions.pdf',
+                        type: 'file',
+                        file_type: 'pdf',
+                        size: '980 KB',
+                        modified: 'Q4 2026',
+                        modified_by: 'SharePoint App',
+                        sharing: 'Private',
+                        download_count: 0,
+                        download_url: '#'
+                    }
+                ];
+                renderFiles();
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>
